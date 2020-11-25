@@ -25,6 +25,9 @@ realtek_board_detect() {
 	*"RE708 V1")
 		name="re708-v1"
 		;;
+	*"TOTOLINK A3002RU v1")
+		name="a3002ru"
+		;;
 	*"GWR1200AC V1")
 		name="gwr1200ac-v1"
 		;;

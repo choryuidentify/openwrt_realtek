@@ -115,6 +115,24 @@ define Device/RealtekDTS
 endef
 
 ifeq ($(SUBTARGET),rtl8197d)
+define Device/A3002RU
+  $(Device/RealtekDTS)
+  BLOCKSIZE := 64k
+  DEVICE_DTS := A3002RU
+  DEVICE_TITLE := TOTOLINK A3002RU v1
+  SUPPORTED_DEVICES := a3002ru
+  IMAGE_SIZE := 7936k
+  DEV_PROFILE := A3002RU
+  CMDLINE := console=ttyS0,38400
+  KERNEL := kernel-bin | append-dtb | lzma | loader-cmdline-compile
+  CVIMG_KERNEL_BURN_ADDR := 0x20000
+  CVIMG_LOADER_START_ADDR := 0x80500000
+  IMAGES := factory.bin sysupgrade.bin
+  IMAGE/factory.bin = append-kernel | append-fake-rootfs | append-rootfs | cvimg-kernel | cvimg-pad-rootfs
+  IMAGE/sysupgrade.bin = append-kernel | append-fake-rootfs | append-rootfs | cvimg-kernel | pad-rootfs
+endef
+TARGET_DEVICES += A3002RU
+
 define Device/DIR815D1
   $(Device/RealtekDTS)
   DEVICE_DTS := DIR815D1
