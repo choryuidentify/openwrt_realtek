@@ -117,7 +117,7 @@ endef
 ifeq ($(SUBTARGET),rtl8197d)
 define Device/A3002RU
   $(Device/RealtekDTS)
-  BLOCKSIZE := 64k
+  BLOCKSIZE := 4k
   DEVICE_DTS := A3002RU
   DEVICE_TITLE := TOTOLINK A3002RU v1
   SUPPORTED_DEVICES := a3002ru
