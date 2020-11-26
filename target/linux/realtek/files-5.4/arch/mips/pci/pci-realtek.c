@@ -11,8 +11,10 @@
 
 #include <linux/pci.h>
 #include <linux/delay.h>
+#include <linux/gpio.h>
 #include <linux/module.h>
 #include <linux/of.h>
+#include <linux/of_gpio.h>
 #include <linux/of_irq.h>
 #include <linux/of_pci.h>
 #include <linux/of_address.h>
@@ -35,6 +37,9 @@ struct realtek_pci_controller {
 	struct resource io_res;
 	struct resource mem_res;
 	struct clk *clk;
+
+	int reset_gpio;
+	bool gpio_active_low;
 };
 
 static inline struct realtek_pci_controller *
@@ -226,22 +231,32 @@ static inline void realtek_pcie_device_reset(struct realtek_pci_controller *rpc)
 {
 	u32 val;
 
-	val = sr_r32(REALTEK_SR_CLKMANAGE);
-	val &= (~BIT(26)); // PERST=0 for PCI port0
-	sr_w32(val, REALTEK_SR_CLKMANAGE);
-	mdelay(100); // SDK wait 1s! too much?
-	val = sr_r32(REALTEK_SR_CLKMANAGE);
-	val |= BIT(26); // PERST=1 for PCI port0
-	sr_w32(val, REALTEK_SR_CLKMANAGE);
-
-	//TODO: Need reset for second card (97D)!
+	if (!gpio_is_valid(rpc->reset_gpio)) {
+		val = sr_r32(REALTEK_SR_CLKMANAGE);
+		val &= (~BIT(26)); // PERST=0 for PCI port0
+		sr_w32(val, REALTEK_SR_CLKMANAGE);
+		mdelay(100); // SDK wait 1s! too much?
+		val = sr_r32(REALTEK_SR_CLKMANAGE);
+		val |= BIT(26); // PERST=1 for PCI port0
+		sr_w32(val, REALTEK_SR_CLKMANAGE);
+	} else {
+		gpio_set_value_cansleep(rpc->reset_gpio, !rpc->gpio_active_low);
+		msleep(100);
+		gpio_set_value_cansleep(rpc->reset_gpio, rpc->gpio_active_low);
+	}
 }
 
 static inline void realtek_pcie_mdio_reset(struct realtek_pci_controller *rpc)
 {
-	sr_w32(BIT(3), REALTEK_SR_PCIE_PHY0); 				// mdio reset 0
-	sr_w32(BIT(3)|BIT(0), REALTEK_SR_PCIE_PHY0); 		// mdio reset 1
-	sr_w32(BIT(3)|BIT(1)|BIT(0), REALTEK_SR_PCIE_PHY0); // load done
+	if (!gpio_is_valid(rpc->reset_gpio)) {
+		sr_w32(BIT(3), REALTEK_SR_PCIE_PHY0); 				// mdio reset 0
+		sr_w32(BIT(3)|BIT(0), REALTEK_SR_PCIE_PHY0); 		// mdio reset 1
+		sr_w32(BIT(3)|BIT(1)|BIT(0), REALTEK_SR_PCIE_PHY0); // load done
+	} else {
+		sr_w32(BIT(3), REALTEK_SR_PCIE_PHY1); 				// mdio reset 0
+		sr_w32(BIT(3)|BIT(0), REALTEK_SR_PCIE_PHY1); 		// mdio reset 1
+		sr_w32(BIT(3)|BIT(1)|BIT(0), REALTEK_SR_PCIE_PHY1); // load done
+	}
 }
 
 static inline void realtek_pcie_phy_reset(struct realtek_pci_controller *rpc)
@@ -256,13 +271,23 @@ static void realtek_pcie_reset(struct realtek_pci_controller *rpc)
 	u32 val;
 
 	//first, Turn On PCIE IP
-	val = sr_r32(REALTEK_SR_CLKMANAGE);
-	val |= BIT(14);
-	sr_w32(val, REALTEK_SR_CLKMANAGE);
+	if (!gpio_is_valid(rpc->reset_gpio)) {
+		val = sr_r32(REALTEK_SR_CLKMANAGE);
+		val |= BIT(14);
+		sr_w32(val, REALTEK_SR_CLKMANAGE);
 
-	val = sr_r32(REALTEK_SR_CLKMANAGE);
-	val |= BIT(26);
-	sr_w32(val, REALTEK_SR_CLKMANAGE);
+		val = sr_r32(REALTEK_SR_CLKMANAGE);
+		val |= BIT(26);
+		sr_w32(val, REALTEK_SR_CLKMANAGE);
+	} else {
+		val = sr_r32(REALTEK_SR_CLKMANAGE);
+		val |= BIT(16);
+		sr_w32(val, REALTEK_SR_CLKMANAGE);
+
+		gpio_set_value_cansleep(rpc->reset_gpio, !rpc->gpio_active_low);
+		msleep(100);
+		gpio_set_value_cansleep(rpc->reset_gpio, rpc->gpio_active_low);
+	}
 
 	val = sr_r32(REALTEK_SR_CLKMANAGE);
 	val |= BIT(12)|BIT(13)|BIT(18)|BIT(19)|BIT(20);
@@ -353,6 +378,8 @@ static int realtek_pci_probe(struct platform_device *pdev)
 	u32 val;
 	u16 cmd;
 	u8 v8;
+	enum of_gpio_flags flags;
+	int ret;
 
 	id = pdev->id;
 	if (id == -1)
@@ -387,6 +414,23 @@ static int realtek_pci_probe(struct platform_device *pdev)
 	rpc->clk = devm_clk_get(&pdev->dev, NULL);
 	if(!rpc->clk)
 		return PTR_ERR(rpc->clk);
+
+	/* Fetch GPIOs */
+	rpc->reset_gpio = of_get_named_gpio_flags(pdev->dev.of_node, "reset-gpios", 0, &flags);
+	rpc->gpio_active_low = (flags & GPIOF_ACTIVE_LOW) == GPIOF_ACTIVE_LOW;
+	if (gpio_is_valid(rpc->reset_gpio)) {
+		ret = devm_gpio_request_one(&pdev->dev, rpc->reset_gpio,
+				rpc->gpio_active_low ?
+					GPIOF_OUT_INIT_LOW :
+					GPIOF_OUT_INIT_HIGH,
+				"PCIe reset");
+		if (ret) {
+			dev_err(&pdev->dev, "unable to get reset gpio\n");
+			return ret;
+		}
+	} else if (rpc->reset_gpio == -EPROBE_DEFER) {
+		return rpc->reset_gpio;
+	}
 
 	iomem_resource.start = 0;
 	iomem_resource.end = ~0;
@@ -425,14 +469,14 @@ int pcibios_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	struct realtek_pci_controller *rpc;
 	u16 cmd;
-	int irq = 5;
+	int irq;
 
 	rpc = pci_bus_to_realtek_pci_controller(dev->bus);
 	if(!rpc)
 		return 0;
 
-	//TODO: Implement second pcie (get irq from dt)
-	// Bus:1 Slot:0 Pin:1 -> first wireless card
+	if (of_property_read_u32(rpc->np, "interrupts", &irq))
+		irq = 5;
 
 	/* setup the slot */
 	cmd = PCI_COMMAND_MASTER | PCI_COMMAND_IO | PCI_COMMAND_MEMORY;
