@@ -14,7 +14,7 @@ diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
 index e94ff573d..9b60d01c4 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -630,6 +630,21 @@ config RALINK
+@@ -630,6 +630,22 @@ config RALINK
  	select ARCH_HAS_RESET_CONTROLLER
  	select RESET_CONTROLLER
  
@@ -30,13 +30,14 @@ index e94ff573d..9b60d01c4 100644
 +	select COMMON_CLK
 +	select TIMER_OF
 +	select CLKSRC_MMIO
++	select HAVE_PCI
 +	help
 +	 Support for Realtek RLX SoC based boards
 +
  config SGI_IP22
  	bool "SGI IP22 (Indy/Indigo2)"
  	select FW_ARC
-@@ -1034,6 +1049,7 @@ source "arch/mips/pic32/Kconfig"
+@@ -1035,6 +1050,7 @@ source "arch/mips/pic32/Kconfig"
  source "arch/mips/pistachio/Kconfig"
  source "arch/mips/pmcs-msp71xx/Kconfig"
  source "arch/mips/ralink/Kconfig"
