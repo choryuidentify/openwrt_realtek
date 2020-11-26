@@ -50,14 +50,20 @@ static u32 mips_chip_irqs;
 
 #define REALTEK_IRQ_GENERIC		2
 
-#define REALTEK_IRQ_TIMER		7
 #define REALTEK_IRQ_NET			4
 #define REALTEK_IRQ_WIFI		6
 #define REALTEK_IRQ_PCI0		5
 #define REALTEK_IRQ_PCI1		REALTEK_IRQ_WIFI
-#define REALTEK_IRQ_UART0		REALTEK_IRQ_GENERIC
 #define REALTEK_IRQ_GPIO1		REALTEK_IRQ_GENERIC
 #define REALTEK_IRQ_GPIO2		REALTEK_IRQ_GENERIC
+
+#ifdef CONFIG_SOC_RTL8197F
+#define REALTEK_IRQ_UART0		REALTEK_IRQ_GENERIC
+#define REALTEK_IRQ_TIMER		7
+#else
+#define REALTEK_IRQ_UART0		8
+#define REALTEK_IRQ_TIMER		13
+#endif
 
 /* Definition for SoCs
    RTL8196E and RTL8197D have a RLX chipset
@@ -114,7 +120,11 @@ u32 realtek_soc_irq_init(void)
 #else
 
 // Above RLX driver (8 for Mips + 8 for hardware RLX)
-#define REALTEK_INTC_IRQ_BASE 16
+
+#define REALTEK_HW_IRQ_BASE		8
+#define REALTEK_HW_IRQ_COUNT	8
+
+#define REALTEK_INTC_IRQ_BASE	16
 
 u32 realtek_soc_irq_init(void)
 {
@@ -140,15 +150,18 @@ u32 realtek_soc_irq_init(void)
 
 	// map high priority interrupts to mips irq controler
 	// TC0 (Timer) (BIT8) to mips
+	// USB Host (BIT10)
+	// UART0 (BIT12)
 	// Network Switch (BIT15)
 	// PCIE0 (wifi0) (BIT21)
-	ic_w32(BIT(8)|BIT(15)|BIT(21)
+	// PCIE1 (wifi1) (BIT22)
+	ic_w32(BIT(8)|BIT(12)|BIT(15)|BIT(21)
 #ifdef CONFIG_SOC_RTL8197D
 		|BIT(22)
 #endif
 		, REALTEK_IC_REG_MASK);
 
-	return BIT(8)|BIT(15)|BIT(21)
+	return BIT(8)|BIT(12)|BIT(15)|BIT(21)
 #ifdef CONFIG_SOC_RTL8197D
 		|BIT(22)
 #endif
@@ -284,8 +297,74 @@ static int __init intc_of_init(struct device_node *node,
 	return 0;
 }
 
+#ifndef CONFIG_SOC_RTL8197F
+static inline void unmask_realtek_hw_irq(struct irq_data *d)
+{
+	set_lxc0_estatus(0x10000 << (d->irq - REALTEK_HW_IRQ_BASE));
+	irq_enable_hazard();
+}
+
+static inline void mask_realtek_hw_irq(struct irq_data *d)
+{
+	clear_lxc0_estatus(0x10000 << (d->irq - REALTEK_HW_IRQ_BASE));
+	irq_disable_hazard();
+}
+
+static struct irq_chip realtek_hw_irq_controller = {
+	.name		= "HW",
+	.irq_ack	= mask_realtek_hw_irq,
+	.irq_mask	= mask_realtek_hw_irq,
+	.irq_mask_ack	= mask_realtek_hw_irq,
+	.irq_unmask	= unmask_realtek_hw_irq,
+	.irq_eoi	= unmask_realtek_hw_irq,
+};
+
+static int realtek_hw_irq_map(struct irq_domain *d, unsigned int irq,
+			     irq_hw_number_t hw)
+{
+	irq_set_chip_and_handler(irq, &realtek_hw_irq_controller, handle_percpu_irq);
+
+	return 0;
+}
+
+static const struct irq_domain_ops realtek_hw_irq_domain_ops = {
+	.map = realtek_hw_irq_map,
+	.xlate = irq_domain_xlate_onecell,
+};
+
+struct irq_domain *hw_irq_domain;
+
+static int __init realtek_hw_irq_init(struct device_node *of_node,
+			       struct device_node *parent)
+{
+	extern char handle_vec;
+
+	/* Mask interrupts. */
+	clear_lxc0_estatus(EST0_IM);
+	clear_lxc0_ecause(ECAUSEF_IP);
+
+	hw_irq_domain = irq_domain_add_legacy(of_node, REALTEK_HW_IRQ_COUNT, REALTEK_HW_IRQ_BASE, REALTEK_HW_IRQ_BASE,
+					   &realtek_hw_irq_domain_ops,
+					   NULL);
+	if (!hw_irq_domain)
+		panic("Failed to add hardware irqdomain for REALTEK CPU");
+
+	write_lxc0_intvec(&handle_vec);
+
+	return 0;
+}
+
+asmlinkage void realtek_do_hw_IRQ(int irq_offset)
+{
+	do_IRQ(REALTEK_HW_IRQ_BASE + irq_offset);
+}
+#endif
+
 static struct of_device_id __initdata of_irq_ids[] = {
 	{ .compatible = "mti,cpu-interrupt-controller", .data = mips_cpu_irq_of_init },
+#ifndef CONFIG_SOC_RTL8197F
+	{ .compatible = "realtek,rtl819x-hw-intc", .data = realtek_hw_irq_init },
+#endif
 	{ .compatible = "realtek,rtl819x-intc", .data = intc_of_init },
 	{},
 };

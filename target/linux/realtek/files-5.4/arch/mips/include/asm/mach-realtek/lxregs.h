@@ -154,11 +154,11 @@ do {								\
 static inline unsigned int					\
 set_lxc0_##name(unsigned int set)				\
 {								\
-	unsigned int res, new;					\
+	unsigned int res;					\
 								\
 	res = read_lxc0_##name();				\
-	new |= set;						\
-	write_lxc0_##name(new);					\
+	res |= set;						\
+	write_lxc0_##name(res);					\
 								\
 	return res;						\
 }								\
@@ -166,11 +166,11 @@ set_lxc0_##name(unsigned int set)				\
 static inline unsigned int					\
 clear_lxc0_##name(unsigned int clear)				\
 {								\
-	unsigned int res, new;					\
+	unsigned int res;					\
 								\
 	res = read_lxc0_##name();				\
-	new = res & ~clear;					\
-	write_lxc0_##name(new);					\
+	res &= ~clear;					\
+	write_lxc0_##name(res);					\
 								\
 	return res;						\
 }								\
@@ -178,12 +178,12 @@ clear_lxc0_##name(unsigned int clear)				\
 static inline unsigned int					\
 change_lxc0_##name(unsigned int change, unsigned int val)	\
 {								\
-	unsigned int res, new;					\
+	unsigned int res;					\
 								\
 	res = read_lxc0_##name();				\
-	new = res & ~change;					\
-	new |= (val & change);					\
-	write_lxc0_##name(new);					\
+	res &= ~change;					\
+	res |= (val & change);					\
+	write_lxc0_##name(res);					\
 								\
 	return res;						\
 }

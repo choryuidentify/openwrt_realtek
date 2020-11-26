@@ -1,0 +1,149 @@
+diff --git a/arch/mips/include/asm/stackframe.h b/arch/mips/include/asm/stackframe.h
+index ecb333678..fc8376d21 100644
+--- a/arch/mips/include/asm/stackframe.h
++++ b/arch/mips/include/asm/stackframe.h
+@@ -191,6 +191,51 @@
+ 		.endm
+ #endif
+ 
++#if defined(CONFIG_REALTEK) && !defined(CONFIG_SOC_RTL8197F)
++		.macro  SAVE_SP
++		.set	push
++		.set	noat
++		.set	reorder
++		mfc0	k0, CP0_STATUS
++		sll	k0, 3       /* extract cu0 bit */
++		.set	noreorder
++		bltz	k0, 8f
++		move	k1, sp
++		.set	reorder
++		/* Called from user mode, new stack. */
++		get_saved_sp
++8:		move	k0, sp
++		PTR_SUBU sp, k1, PT_SIZE
++		LONG_S	k0, PT_R29(sp)
++		.set    pop
++		.endm
++
++		.macro	SAVE_SOME_BUT_SP
++		.set	push
++		.set	noat
++		.set	reorder
++		LONG_S	$3, PT_R3(sp)
++		LONG_S	$0, PT_R0(sp)
++		mfc0	v1, CP0_STATUS
++		LONG_S	$2, PT_R2(sp)
++		LONG_S	$4, PT_R4(sp)
++		LONG_S	$5, PT_R5(sp)
++		LONG_S	v1, PT_STATUS(sp)
++		mfc0	v1, CP0_CAUSE
++		LONG_S	$6, PT_R6(sp)
++		LONG_S	$7, PT_R7(sp)
++		LONG_S	v1, PT_CAUSE(sp)
++		MFC0	v1, CP0_EPC
++		LONG_S	$25, PT_R25(sp)
++		LONG_S	$28, PT_R28(sp)
++		LONG_S	$31, PT_R31(sp)
++		LONG_S	v1, PT_EPC(sp)
++		ori	$28, sp, _THREAD_MASK
++		xori	$28, _THREAD_MASK
++		.set	pop
++		.endm
++#endif
++
+ 		.macro	SAVE_SOME docfi=0
+ 		.set	push
+ 		.set	noat
+@@ -288,6 +333,15 @@
+ 		.set	pop
+ 		.endm
+ 
++#if defined(CONFIG_REALTEK) && !defined(CONFIG_SOC_RTL8197F)
++		.macro  SAVE_ALL_BUT_SP docfi=0
++		SAVE_SOME_BUT_SP
++		SAVE_AT \docfi
++		SAVE_TEMP \docfi
++		SAVE_STATIC \docfi
++		.endm
++#endif
++
+ 		.macro	SAVE_ALL docfi=0
+ 		SAVE_SOME \docfi
+ 		SAVE_AT \docfi
+diff --git a/arch/mips/kernel/genex.S b/arch/mips/kernel/genex.S
+index 4213f087f..d58237703 100644
+--- a/arch/mips/kernel/genex.S
++++ b/arch/mips/kernel/genex.S
+@@ -460,6 +460,72 @@ NESTED(nmi_handler, PT_SIZE, sp)
+ 	.set	pop
+ 	END(nmi_handler)
+ 
++#if defined(CONFIG_REALTEK) && !defined(CONFIG_SOC_RTL8197F)
++	.align	6
++NESTED(handle_vec, PT_SIZE, sp)
++	.set push
++	.set noreorder
++	b     0f
++	 nop
++	b     1f
++	 nop
++	b     2f
++	 nop
++	b     3f
++	 nop
++	b     4f
++	 nop
++	b     5f
++	 nop
++	b     6f
++	 nop
++	b     7f
++	 nop
++
++0:	SAVE_SP
++	b    9f
++	 li  k1, 0
++
++1:	SAVE_SP
++	b    9f
++	 li  k1, 1
++
++2:	SAVE_SP
++	b    9f
++	 li  k1, 2
++
++3:	SAVE_SP
++	b    9f
++	 li  k1, 3
++
++4:	SAVE_SP
++	b    9f
++	 li  k1, 4
++
++5:	SAVE_SP
++	b    9f
++	 li  k1, 5
++
++6:	SAVE_SP
++	b    9f
++	 li  k1, 6
++
++7:	SAVE_SP
++	li  k1, 7
++	.set pop
++
++9:	SAVE_ALL_BUT_SP
++	CLI
++	TRACE_IRQS_OFF
++
++	LONG_L  s0, TI_REGS($28)
++	LONG_S  sp, TI_REGS($28)
++	PTR_LA  ra, ret_from_irq
++	move    a0, k1
++	j       realtek_do_hw_IRQ
++	END(handle_vec)
++#endif
++
+ 	.macro	__build_clear_none
+ 	.endm
+ 

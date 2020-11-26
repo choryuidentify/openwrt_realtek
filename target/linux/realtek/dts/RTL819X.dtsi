@@ -11,6 +11,13 @@
 		compatible = "mti,cpu-interrupt-controller";
 	};
 
+	hwintc: hwintc {
+		#address-cells = <0>;
+		#interrupt-cells = <1>;
+		interrupt-controller;
+		compatible = "realtek,rtl819x-hw-intc";
+	};
+
 	refclk: refclk {
 		/* 25Mhz default clock */
 		#clock-cells = <0>;
@@ -46,8 +53,8 @@
 			compatible = "realtek,rtl819x-uart", "ns16550a";
 			reg = <0x2000 0x20>;
 
-			interrupt-parent = <&intc>;
-			interrupts = <12>;
+			interrupt-parent = <&hwintc>;
+			interrupts = <8>;
 
 			reg-shift = <2>;
 			clock-frequency = <200000000>;
@@ -68,8 +75,8 @@
 			compatible = "realtek,rtl819x-timer";
 			reg = <0x3100 0x20>;
 
-			interrupt-parent = <&cpuintc>;
-			interrupts = <7>;
+			interrupt-parent = <&hwintc>;
+			interrupts = <13>;
 
 			clocks = <&refclk>;
 		};
