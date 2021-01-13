@@ -104,6 +104,18 @@
 	};
 };
 
+&usbphy {
+	realtek,oneportsel;
+};
+
+&ehci {
+	status = "okay";
+};
+
+&ohci {
+	status = "okay";
+};
+
 &pcie0 {
 	status = "okay";
 };

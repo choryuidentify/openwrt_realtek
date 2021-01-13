@@ -62,7 +62,9 @@ static u32 mips_chip_irqs;
 #define REALTEK_IRQ_TIMER		7
 #else
 #define REALTEK_IRQ_UART0		8
+#define REALTEK_IRQ_USB_HOST	10
 #define REALTEK_IRQ_TIMER		13
+#define REALTEK_IRQ_USB_OTG		15
 #endif
 
 /* Definition for SoCs
@@ -132,6 +134,7 @@ u32 realtek_soc_irq_init(void)
 		REALTEK_IC_REG_IRR0);
 
 	ic_w32((REALTEK_IRQ_TIMER << 0  |
+			REALTEK_IRQ_USB_HOST << 8 |
 			REALTEK_IRQ_UART0 << 16 |
 			REALTEK_IRQ_NET   << 28 ),
 		REALTEK_IC_REG_IRR1);
@@ -155,13 +158,13 @@ u32 realtek_soc_irq_init(void)
 	// Network Switch (BIT15)
 	// PCIE0 (wifi0) (BIT21)
 	// PCIE1 (wifi1) (BIT22)
-	ic_w32(BIT(8)|BIT(12)|BIT(15)|BIT(21)
+	ic_w32(BIT(8)|BIT(10)|BIT(12)|BIT(15)|BIT(21)
 #ifdef CONFIG_SOC_RTL8197D
 		|BIT(22)
 #endif
 		, REALTEK_IC_REG_MASK);
 
-	return BIT(8)|BIT(12)|BIT(15)|BIT(21)
+	return BIT(8)|BIT(10)|BIT(12)|BIT(15)|BIT(21)
 #ifdef CONFIG_SOC_RTL8197D
 		|BIT(22)
 #endif

@@ -1,0 +1,11 @@
+#
+# PHY drivers for Realtek platforms.
+#
+config PHY_REALTEK_USB
+	tristate "Realtek USB PHY driver"
+	depends on REALTEK || COMPILE_TEST
+	select GENERIC_PHY
+	select MFD_SYSCON
+	help
+	  This option enables support for the Realtek USB PHY found inside
+	  RTL819x.

@@ -1,0 +1,76 @@
+diff --git a/drivers/phy/Kconfig b/drivers/phy/Kconfig
+index 0263db2ac..8655f076a 100644
+--- a/drivers/phy/Kconfig
++++ b/drivers/phy/Kconfig
+@@ -62,6 +62,7 @@ source "drivers/phy/motorola/Kconfig"
+ source "drivers/phy/mscc/Kconfig"
+ source "drivers/phy/qualcomm/Kconfig"
+ source "drivers/phy/ralink/Kconfig"
++source "drivers/phy/realtek/Kconfig"
+ source "drivers/phy/renesas/Kconfig"
+ source "drivers/phy/rockchip/Kconfig"
+ source "drivers/phy/samsung/Kconfig"
+diff --git a/drivers/phy/Makefile b/drivers/phy/Makefile
+index c96a1afc9..3cb14fbcf 100644
+--- a/drivers/phy/Makefile
++++ b/drivers/phy/Makefile
+@@ -11,6 +11,7 @@ obj-$(CONFIG_PHY_PISTACHIO_USB)		+= phy-pistachio-usb.o
+ obj-$(CONFIG_ARCH_SUNXI)		+= allwinner/
+ obj-$(CONFIG_ARCH_MESON)		+= amlogic/
+ obj-$(CONFIG_ARCH_MEDIATEK)		+= mediatek/
++obj-$(CONFIG_REALTEK)			+= realtek/
+ obj-$(CONFIG_ARCH_RENESAS)		+= renesas/
+ obj-$(CONFIG_ARCH_ROCKCHIP)		+= rockchip/
+ obj-$(CONFIG_ARCH_TEGRA)		+= tegra/
+diff --git a/drivers/usb/host/ehci.h b/drivers/usb/host/ehci.h
+index f85e53d03..9f0096785 100644
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -739,7 +739,9 @@ ehci_port_speed(struct ehci_hcd *ehci, unsigned int portsc)
+ static inline unsigned int ehci_readl(const struct ehci_hcd *ehci,
+ 		__u32 __iomem *regs)
+ {
+-#ifdef CONFIG_USB_EHCI_BIG_ENDIAN_MMIO
++#if defined(CONFIG_REALTEK)
++	return __le32_to_cpu(readl(regs));
++#elif defined(CONFIG_USB_EHCI_BIG_ENDIAN_MMIO)
+ 	return ehci_big_endian_mmio(ehci) ?
+ 		readl_be(regs) :
+ 		readl(regs);
+@@ -763,7 +765,9 @@ static inline void imx28_ehci_writel(const unsigned int val,
+ static inline void ehci_writel(const struct ehci_hcd *ehci,
+ 		const unsigned int val, __u32 __iomem *regs)
+ {
+-#ifdef CONFIG_USB_EHCI_BIG_ENDIAN_MMIO
++#if defined(CONFIG_REALTEK)
++	writel(__le32_to_cpu(val), regs);
++#elif defined(CONFIG_USB_EHCI_BIG_ENDIAN_MMIO)
+ 	ehci_big_endian_mmio(ehci) ?
+ 		writel_be(val, regs) :
+ 		writel(val, regs);
+diff --git a/drivers/usb/host/ohci.h b/drivers/usb/host/ohci.h
+index b015b0077..86b638329 100644
+--- a/drivers/usb/host/ohci.h
++++ b/drivers/usb/host/ohci.h
+@@ -561,7 +561,9 @@ static inline struct usb_hcd *ohci_to_hcd (const struct ohci_hcd *ohci)
+ static inline unsigned int _ohci_readl (const struct ohci_hcd *ohci,
+ 					__hc32 __iomem * regs)
+ {
+-#ifdef CONFIG_USB_OHCI_BIG_ENDIAN_MMIO
++#if defined(CONFIG_REALTEK)
++	return __le32_to_cpu(readl(regs));
++#elif defined(CONFIG_USB_OHCI_BIG_ENDIAN_MMIO)
+ 	return big_endian_mmio(ohci) ?
+ 		readl_be (regs) :
+ 		readl (regs);
+@@ -573,7 +575,9 @@ static inline unsigned int _ohci_readl (const struct ohci_hcd *ohci,
+ static inline void _ohci_writel (const struct ohci_hcd *ohci,
+ 				 const unsigned int val, __hc32 __iomem *regs)
+ {
+-#ifdef CONFIG_USB_OHCI_BIG_ENDIAN_MMIO
++#if defined(CONFIG_REALTEK)
++	writel(__le32_to_cpu(val), regs);
++#elif defined(CONFIG_USB_OHCI_BIG_ENDIAN_MMIO)
+ 	big_endian_mmio(ohci) ?
+ 		writel_be (val, regs) :
+ 		writel (val, regs);

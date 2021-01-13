@@ -40,7 +40,7 @@
 		#size-cells = <1>;
 
 		sysc: system-controller@0 {
-			compatible = "realtek,rtl819x-sysc";
+			compatible = "realtek,rtl819x-sysc", "syscon";
 			reg = <0x0 0x1000>;
 		};
 
@@ -106,6 +106,39 @@
 
 			status = "disabled";
 		};
+	};
+
+	usbphy: usbphy {
+		compatible = "realtek,rtl819x-usbphy";
+		#phy-cells = <0>;
+
+		realtek,sysctl = <&sysc>;
+	};
+
+	ehci: ehci@18021000 {
+		compatible = "generic-ehci";
+		reg = <0x18021000 0xf000>;
+
+		interrupt-parent = <&hwintc>;
+		interrupts = <10>;
+
+		phys = <&usbphy>;
+		phy-names = "usb";
+
+		status = "disabled";
+	};
+
+	ohci: ohci@18020000 {
+		compatible = "generic-ohci";
+		reg = <0x18020000 0x1000>;
+
+		interrupt-parent = <&hwintc>;
+		interrupts = <10>;
+
+		phys = <&usbphy>;
+		phy-names = "usb";
+
+		status = "disabled";
 	};
 
 	pcie0: pcie-controller@18b00000 {
