@@ -34,7 +34,7 @@
 		memc: memory-controller@1000 {
 			compatible = "realtek,rtl819x-memc";
 			reg = <0x1000 0x100>;
-		};		
+		};
 
 		intc: intc@3000 {
 			compatible = "realtek,rtl819x-intc";

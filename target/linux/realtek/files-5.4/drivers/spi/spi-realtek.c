@@ -107,7 +107,7 @@ static void realtek_spi_poll(struct realtek_spi_data *rsd)
 static void realtek_spi_set_cs(struct spi_device *spi, bool cs_high)
 {
 	struct realtek_spi_data *rsd = spi_master_get_devdata(spi->master);
-	
+
 	cs_high = (spi->mode & SPI_CS_HIGH) ? !cs_high : cs_high;
 
 	if (cs_high) {

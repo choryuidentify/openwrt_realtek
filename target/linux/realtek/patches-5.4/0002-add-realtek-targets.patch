@@ -1,8 +1,8 @@
-Index: linux-4.14.131/arch/mips/Kbuild.platforms
-===================================================================
---- linux-4.14.131.orig/arch/mips/Kbuild.platforms
-+++ linux-4.14.131/arch/mips/Kbuild.platforms
-@@ -27,6 +27,7 @@ platforms += pmcs-msp71xx
+diff --git a/arch/mips/Kbuild.platforms b/arch/mips/Kbuild.platforms
+index 0de839882..bcca67b21 100644
+--- a/arch/mips/Kbuild.platforms
++++ b/arch/mips/Kbuild.platforms
+@@ -28,6 +28,7 @@ platforms += pmcs-msp71xx
  platforms += pnx833x
  platforms += ralink
  platforms += rb532
@@ -10,10 +10,10 @@ Index: linux-4.14.131/arch/mips/Kbuild.platforms
  platforms += sgi-ip22
  platforms += sgi-ip27
  platforms += sgi-ip32
-Index: linux-4.14.131/arch/mips/Kconfig
-===================================================================
---- linux-4.14.131.orig/arch/mips/Kconfig
-+++ linux-4.14.131/arch/mips/Kconfig
+diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
+index e94ff573d..9b60d01c4 100644
+--- a/arch/mips/Kconfig
++++ b/arch/mips/Kconfig
 @@ -630,6 +630,21 @@ config RALINK
  	select ARCH_HAS_RESET_CONTROLLER
  	select RESET_CONTROLLER
@@ -36,7 +36,7 @@ Index: linux-4.14.131/arch/mips/Kconfig
  config SGI_IP22
  	bool "SGI IP22 (Indy/Indigo2)"
  	select FW_ARC
-@@ -1032,6 +1048,7 @@ source "arch/mips/pic32/Kconfig"
+@@ -1034,6 +1049,7 @@ source "arch/mips/pic32/Kconfig"
  source "arch/mips/pistachio/Kconfig"
  source "arch/mips/pmcs-msp71xx/Kconfig"
  source "arch/mips/ralink/Kconfig"
@@ -44,15 +44,15 @@ Index: linux-4.14.131/arch/mips/Kconfig
  source "arch/mips/sgi-ip27/Kconfig"
  source "arch/mips/sibyte/Kconfig"
  source "arch/mips/txx9/Kconfig"
-Index: linux-4.14.131/arch/mips/boot/dts/Makefile
-===================================================================
---- linux-4.14.131.orig/arch/mips/boot/dts/Makefile
-+++ linux-4.14.131/arch/mips/boot/dts/Makefile
-@@ -10,6 +10,7 @@ dts-dirs	+= ni
- dts-dirs	+= pic32
- dts-dirs	+= qca
- dts-dirs	+= ralink
-+dts-dirs	+= realtek
- dts-dirs	+= xilfpga
+diff --git a/arch/mips/boot/dts/Makefile b/arch/mips/boot/dts/Makefile
+index 1e79cab8e..50dc192bb 100644
+--- a/arch/mips/boot/dts/Makefile
++++ b/arch/mips/boot/dts/Makefile
+@@ -11,6 +11,7 @@ subdir-y	+= ni
+ subdir-y	+= pic32
+ subdir-y	+= qca
+ subdir-y	+= ralink
++subdir-y	+= realtek
+ subdir-y	+= xilfpga
  
- obj-y		:= $(addsuffix /, $(dts-dirs))
+ obj-$(CONFIG_BUILTIN_DTB)	:= $(addsuffix /, $(subdir-y))

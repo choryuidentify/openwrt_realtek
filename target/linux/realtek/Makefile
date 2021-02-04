@@ -13,7 +13,7 @@ SUBTARGETS:=rtl8197d rtl8196e rtl8197f
 FEATURES:=squashfs gpio
 MAINTAINER:=Anlix <contato@anlix.io>
 
-KERNEL_PATCHVER:=4.14
+KERNEL_PATCHVER:=5.4
 
 define Target/Description
 	Build firmware images for Realtek based boards.

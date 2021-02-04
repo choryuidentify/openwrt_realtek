@@ -48,20 +48,20 @@ static u32 mips_chip_irqs;
 
 #define REALTEK_INTC_IRQ_COUNT	32
 
-#define REALTEK_IRQ_GENERIC		2   
+#define REALTEK_IRQ_GENERIC		2
 
 #define REALTEK_IRQ_TIMER		7
 #define REALTEK_IRQ_NET			4
 #define REALTEK_IRQ_WIFI		6
 #define REALTEK_IRQ_PCI0		5
 #define REALTEK_IRQ_PCI1		REALTEK_IRQ_WIFI
-#define REALTEK_IRQ_UART0		REALTEK_IRQ_GENERIC  
+#define REALTEK_IRQ_UART0		REALTEK_IRQ_GENERIC
 #define REALTEK_IRQ_GPIO1		REALTEK_IRQ_GENERIC
 #define REALTEK_IRQ_GPIO2		REALTEK_IRQ_GENERIC
 
 /* Definition for SoCs
    RTL8196E and RTL8197D have a RLX chipset
-     They use 32 SoC IRQs abose the hardware 
+     They use 32 SoC IRQs abose the hardware
    RTL8197F Have 64 SoC IRQs, but dont have
      the additional 8 hardware irqs
 */
@@ -70,33 +70,33 @@ static u32 mips_chip_irqs;
 
 #define REALTEK_INTC_IRQ_BASE 8
 
-u32 realtek_soc_irq_init(void) 
+u32 realtek_soc_irq_init(void)
 {
-	ic_w32((0), 
+	ic_w32((0),
 		REALTEK_IC_REG_IRR0);
 
 	ic_w32((REALTEK_IRQ_NET 	<< 28) |
-		   (REALTEK_IRQ_UART0 	<< 4), 
+		   (REALTEK_IRQ_UART0 	<< 4),
 		REALTEK_IC_REG_IRR1);
 
 	ic_w32((REALTEK_IRQ_PCI0 << 20) |
 		   (REALTEK_IRQ_GPIO2 << 4) |
-		   (REALTEK_IRQ_GPIO1 << 0), 
+		   (REALTEK_IRQ_GPIO1 << 0),
 		REALTEK_IC_REG_IRR2);
 
-	ic_w32((REALTEK_IRQ_WIFI << 20), 
+	ic_w32((REALTEK_IRQ_WIFI << 20),
 		REALTEK_IC_REG_IRR3);
 
-	ic_w32((0), 
+	ic_w32((0),
 		REALTEK_IC_REG_IRR4);
 
-	ic_w32((REALTEK_IRQ_TIMER << 28), 
+	ic_w32((REALTEK_IRQ_TIMER << 28),
 		REALTEK_IC_REG_IRR5);
 
-	ic_w32((0), 
+	ic_w32((0),
 		REALTEK_IC_REG_IRR6);
 
-	ic_w32((0), 
+	ic_w32((0),
 		REALTEK_IC_REG_IRR7);
 
 	// map high priority interrupts to mips irq controler
@@ -116,14 +116,14 @@ u32 realtek_soc_irq_init(void)
 // Above RLX driver (8 for Mips + 8 for hardware RLX)
 #define REALTEK_INTC_IRQ_BASE 16
 
-u32 realtek_soc_irq_init(void) 
+u32 realtek_soc_irq_init(void)
 {
-	ic_w32((0), 
+	ic_w32((0),
 		REALTEK_IC_REG_IRR0);
 
-	ic_w32((REALTEK_IRQ_TIMER << 0  | 
+	ic_w32((REALTEK_IRQ_TIMER << 0  |
 			REALTEK_IRQ_UART0 << 16 |
-			REALTEK_IRQ_NET   << 28 ), 
+			REALTEK_IRQ_NET   << 28 ),
 		REALTEK_IC_REG_IRR1);
 
 
@@ -132,10 +132,10 @@ u32 realtek_soc_irq_init(void)
 #ifdef CONFIG_SOC_RTL8197D
 		| REALTEK_IRQ_PCI1 << 24
 #endif
-		), 
+		),
 		REALTEK_IC_REG_IRR2);
 
-	ic_w32((0), 
+	ic_w32((0),
 		REALTEK_IC_REG_IRR3);
 
 	// map high priority interrupts to mips irq controler
@@ -230,16 +230,16 @@ asmlinkage void plat_irq_dispatch(void)
 
 	pending = read_c0_status() & read_c0_cause() & ST0_IM;
 
-	if (pending & STATUSF_IP7) 
+	if (pending & STATUSF_IP7)
 		do_IRQ(REALTEK_IRQ_TIMER);
 
-	else if (pending & STATUSF_IP4) 
+	else if (pending & STATUSF_IP4)
 		do_IRQ(REALTEK_IRQ_NET);
 
-	else if (pending & STATUSF_IP5) 
+	else if (pending & STATUSF_IP5)
 		do_IRQ(REALTEK_IRQ_PCI0);
 
-	else if (pending & STATUSF_IP6) 
+	else if (pending & STATUSF_IP6)
 		do_IRQ(REALTEK_IRQ_PCI1);
 
 	else if (pending & STATUSF_IP2)

@@ -345,22 +345,6 @@ static void lexra_flush_data_cache_page(unsigned long addr)
 {
 }
 
-static void lexra_flush_cache_sigtramp(unsigned long addr)
-{
-	unsigned long flags;
-
-	pr_debug("csigtramp[%08lx]\n", addr);
-
-	flags = read_c0_status();
-
-	write_c0_status(flags & ~ST0_IEC);
-
-	/* Fill the TLB to avoid an exception with caches isolated. */
-	lexra_flush_icache_range(addr, lexra_icache_lsize);
-
-	write_c0_status(flags);
-}
-
 static void lexra_flush_kernel_vmap_range(unsigned long vaddr, int size)
 {
 	BUG();
@@ -420,7 +404,6 @@ void lexra_cache_init(void)
 
 	__flush_kernel_vmap_range = lexra_flush_kernel_vmap_range;
 
-	flush_cache_sigtramp = lexra_flush_cache_sigtramp;
 	local_flush_data_cache_page = local_lexra_flush_data_cache_page;
 	flush_data_cache_page = lexra_flush_data_cache_page;
 

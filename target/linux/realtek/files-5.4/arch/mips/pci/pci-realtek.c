@@ -83,7 +83,7 @@ int realtek_pci_raw_read(void __iomem *mem, int where, int size, uint32_t *value
 	return PCIBIOS_SUCCESSFUL;
 }
 
-static 
+static
 #if defined(CONFIG_CPU_RLX)
 __attribute__ ((section(".iram")))
 #endif
@@ -123,13 +123,13 @@ int realtek_pci_read(struct pci_bus *bus, unsigned int devfn, int where,
 			__raw_writel(((bus->number) << 8) | (PCI_SLOT(devfn) << 3) | PCI_FUNC(devfn), rpc->rc_ext_base+0x0c);
 			if(value)
 				realtek_pci_raw_read(rpc->dev_cfg1_base, where, size, value);
-		}	
+		}
 	}
 
 	return PCIBIOS_SUCCESSFUL;
 }
 
-static inline 
+static inline
 #if defined(CONFIG_CPU_RLX)
 __attribute__ ((section(".iram")))
 #endif
@@ -157,7 +157,7 @@ int realtek_pci_raw_write(void __iomem *mem, int where, int size, uint32_t value
 	return PCIBIOS_SUCCESSFUL;
 }
 
-static 
+static
 #if defined(CONFIG_CPU_RLX)
 __attribute__ ((section(".iram")))
 #endif
@@ -194,7 +194,7 @@ int realtek_pci_write(struct pci_bus *bus, unsigned int devfn, int where,
 			// (0xc = PCIE0 IPCFG)
 			__raw_writel(((bus->number) << 8) | (PCI_SLOT(devfn) << 3) | PCI_FUNC(devfn), rpc->rc_ext_base+0x0c);
 			realtek_pci_raw_write(rpc->dev_cfg1_base, where, size, value);
-		}	
+		}
 	}
 
 	return PCIBIOS_SUCCESSFUL;
@@ -204,7 +204,6 @@ static struct pci_ops realtek_pci_ops = {
 	.read	= realtek_pci_read,
 	.write	= realtek_pci_write,
 };
-
 
 static int realtek_pcie_check_link(struct realtek_pci_controller *rpc)
 {
@@ -279,7 +278,7 @@ static void realtek_pcie_reset(struct realtek_pci_controller *rpc)
 	// Configure mdio
 	realtek_pcie_mdio_write(rpc, 0x00, 0xd087);
 	realtek_pcie_mdio_write(rpc, 0x01, 0x0003);
-	realtek_pcie_mdio_write(rpc, 0x02, 0x4d19); //0x4d18); 
+	realtek_pcie_mdio_write(rpc, 0x02, 0x4d19); //0x4d18);
 	realtek_pcie_mdio_write(rpc, 0x04, 0x5000);
 
 	if (clk_get_rate(rpc->clk) == 40000000) {
@@ -295,20 +294,20 @@ static void realtek_pcie_reset(struct realtek_pci_controller *rpc)
 		realtek_pcie_mdio_write(rpc, 0x08, 0x0c56);
 	}
 
-	realtek_pcie_mdio_write(rpc, 0x09, 0x539c); 
+	realtek_pcie_mdio_write(rpc, 0x09, 0x539c);
 	realtek_pcie_mdio_write(rpc, 0x0a, 0x20eb);
 	realtek_pcie_mdio_write(rpc, 0x0d, 0x1766);
 	realtek_pcie_mdio_write(rpc, 0x0b, 0x0711);
 
 #ifdef CONFIG_SOC_RTL8196E
-	realtek_pcie_mdio_write(rpc, 0x0f, 0x0f0f); 
+	realtek_pcie_mdio_write(rpc, 0x0f, 0x0f0f);
 #else
-	realtek_pcie_mdio_write(rpc, 0x0f, 0x0a00); 
+	realtek_pcie_mdio_write(rpc, 0x0f, 0x0a00);
 #endif
 
 	realtek_pcie_mdio_write(rpc, 0x19, 0xfce0);
 	realtek_pcie_mdio_write(rpc, 0x1a, 0x7e40); //0x7e4f);
-	realtek_pcie_mdio_write(rpc, 0x1b, 0xfc01);	 
+	realtek_pcie_mdio_write(rpc, 0x1b, 0xfc01);
 	realtek_pcie_mdio_write(rpc, 0x1e, 0xc280);
 
 	realtek_pcie_device_reset(rpc);
