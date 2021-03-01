@@ -108,6 +108,32 @@
 		};
 	};
 
+	eth0: eth@18010000 {
+		compatible = "realtek,re865x-eth";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = 	<0x18010000 0x10000>,	/* NIC */
+				<0x1b000000 0x10000>,	/* SWTABLE */
+				<0x1b800000 0x10000>;	/* SWCORE */
+		reg-names = "nic_base", "swtbl_base", "sw_base";
+		interrupt-parent = <&hwintc>;
+		interrupts = <12>;
+		realtek,sysctl = <&sysc>;
+
+		port@0 {
+			compatible = "realtek,eth-port";
+			reg = <0>;
+
+			status = "disabled";
+		};
+		port@5 {
+			compatible = "realtek,eth-port";
+			reg = <5>;
+
+			status = "disabled";
+		};
+	};
+
 	usbphy: usbphy {
 		compatible = "realtek,rtl819x-usbphy";
 		#phy-cells = <0>;

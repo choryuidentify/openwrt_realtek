@@ -50,7 +50,6 @@ static u32 mips_chip_irqs;
 
 #define REALTEK_IRQ_GENERIC		2
 
-#define REALTEK_IRQ_NET			4
 #define REALTEK_IRQ_WIFI		6
 #define REALTEK_IRQ_PCI0		5
 #define REALTEK_IRQ_PCI1		REALTEK_IRQ_WIFI
@@ -59,10 +58,12 @@ static u32 mips_chip_irqs;
 
 #ifdef CONFIG_SOC_RTL8197F
 #define REALTEK_IRQ_UART0		REALTEK_IRQ_GENERIC
+#define REALTEK_IRQ_NET			4
 #define REALTEK_IRQ_TIMER		7
 #else
 #define REALTEK_IRQ_UART0		8
 #define REALTEK_IRQ_USB_HOST	10
+#define REALTEK_IRQ_NET			12
 #define REALTEK_IRQ_TIMER		13
 #define REALTEK_IRQ_USB_OTG		15
 #endif

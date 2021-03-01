@@ -7,12 +7,11 @@
 board_config_update
 board=$(cat /tmp/sysinfo/board_name)
 
-ucidef_set_interfaces_lan_wan "eth0" "eth1"
-
-lan_mac=""
-wan_mac=""
-
 case $board in
+  a3002ru)
+    ucidef_add_switch "switch1" \
+		"1:lan" "2:lan" "3:lan" "4:lan" "0:wan" "6@eth0"
+	;;
   dir-815-d1)
     offset=$(strings -t x "$(find_mtd_part boot)" | grep llconfig | head -n 1 | awk '{ print "0x"$1 }')
     offset=$((offset+53))
