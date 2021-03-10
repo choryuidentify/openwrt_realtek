@@ -36,17 +36,6 @@
 #define CM_PROTECT						BIT(27)
 #define CM_ACTIVE_SWCORE				BIT(11)
 
-#define RTL819X_SYSC_REG_PIN_MUX_SEL	0x40
-#define PMS_P0MDIO_SHIFT				3
-#define PMS_P0MDIO_MASK					0x3
-#define PMS_P0MDIO_MDIO					0x0
-#define PMS_P0MDIO_GPIO					0x3
-#define PMS_FCS1N_SHIFT					12
-#define PMS_FCS1N_MASK					0x3
-#define PMS_FCS1N_SF_CS1				0x0
-#define PMS_FCS1N_NAND_CE				0x1
-#define PMS_FCS1N_GPIOA1				0x3
-
 struct rtl865x_vlan_cache {
 	u16 vid;
 	u8 members;

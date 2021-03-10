@@ -70,11 +70,17 @@
 		jtag_as_gpio: pinmux_jtag_as_gpio {
 			pinctrl-single,bits = <0x0 0x6 0x7>;
 		};
+		mdio_as_gpio: pinmux_mdio_as_gpio {
+			pinctrl-single,bits = <0x0 0x18 0x18>;
+		};
 		uart0_enable: pinmux_uart0_enable {
 			pinctrl-single,bits = <0x0 0x0 0x20>;
 		};
 		pcie0_rst_enable: pinmux_pcie0_rst_enable {
 			pinctrl-single,bits = <0x0 0x0 0x40>;
+		};
+		fcs1n_as_gpio: pinmux_fcs1n_as_gpio {
+			pinctrl-single,bits = <0x0 0x3000 0x3000>;
 		};
 	};
 
@@ -157,6 +163,9 @@
 
 &eth0 {
 	status = "okay";
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&mdio_as_gpio>, <&fcs1n_as_gpio>;
 
 	mtd-mac-address = <&hw 0x07>;
 	port@0 {

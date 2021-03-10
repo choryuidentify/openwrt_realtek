@@ -159,10 +159,6 @@ void rtl865x_port_init(struct rtl865x *rsw, struct device_node *np)
 
 			reset = of_find_node_by_name(NULL, "rtl8367rb");
 			if (reset) {
-				regmap_update_bits(rsw->sysctl, RTL819X_SYSC_REG_PIN_MUX_SEL,
-					(PMS_FCS1N_MASK<<PMS_FCS1N_SHIFT)|(PMS_P0MDIO_MASK<<PMS_P0MDIO_SHIFT),
-					(PMS_FCS1N_GPIOA1<<PMS_FCS1N_SHIFT)|(PMS_P0MDIO_GPIO<<PMS_P0MDIO_SHIFT));
-
 				reset_gpio = of_get_named_gpio_flags(reset, "gpio-reset", 0, &flags);
 				if (reset_gpio < 0) {
 					dev_err(rsw->parent, "of_get_named_gpio failed for gpio-reset, err=%d\n", reset_gpio);
