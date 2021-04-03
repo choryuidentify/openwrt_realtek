@@ -96,10 +96,10 @@ void rtl865x_port_init(struct rtl865x *rsw, struct device_node *np)
 
 	if (phy_fixed[id]) {
 		const __be32 *link = phy_fixed[id];
-		int speed, tx_fc, rx_fc, duplex, port_reg = 0x4C;
+		int speed, tx_fc, rx_fc, duplex, port_reg = RTL865X_SW_REG_PORT0_GMII_CONFIG;
 
 		if (id == 5)
-			port_reg = 0x50;
+			port_reg = RTL865X_SW_REG_PORT5_GMII_CONFIG;
 
 		speed = be32_to_cpup(link++);
 		tx_fc = be32_to_cpup(link++);
@@ -125,27 +125,42 @@ void rtl865x_port_init(struct rtl865x *rsw, struct device_node *np)
 		val |= (6 << RTL865X_SW_96C_98_PORT_EXT_PHY_ID_SHIFT) | (1<<13) | //MIIcfg_RXER
 			RTL865X_SW_96C_98_PORT_FORCED_MODE | RTL865X_SW_96C_98_PORT_MAC_RESET_L |
 			(RTL865X_SW_PORT_PACKET_LENGTH_1536 << RTL865X_SW_PORT_PACKET_LENGTH_SHIFT) |
-			RTL865X_SW_PORT_ENABLE_PHY_IF |
-			(1<<23); //ForceLink
+			RTL865X_SW_PORT_ENABLE_PHY_IF | RTL865X_SW_96C_98_PORT_FORCE_LINK;
 		if (tx_fc)
 			val |= (1 << 16);
 		if (rx_fc)
 			val |= (1 << 17);
 		if (duplex)
-			val |= (1 << 18);//ForceDuplex
+			val |= RTL865X_SW_96C_98_PORT_FORCE_DUPLEX;
 
 		rtl865x_reg_rmw(rsw, RTL865X_SW_REG_PORT_CONFIG(id),
 			(RTL865X_SW_96C_98_PORT_EXT_PHY_ID_MASK << RTL865X_SW_96C_98_PORT_EXT_PHY_ID_SHIFT) |
 			(0x1f<<18), val); // AutoNegoSts_MASK
 
-		rtl865x_reg_rmw(rsw, RTL865X_SW_REG_MAC_CONFIG, 0, (1<<12));   //giga link
-		rtl865x_reg_rmw(rsw, RTL865X_SW_REG_MAC_CONFIG, RTL865X_SW_CF_RXIPG_MASK, 0x5); /* 100M half duplex enhancement */ //???
-		rtl865x_reg_rmw(rsw, RTL865X_SW_REG_MAC_CONFIG, (0x7f<<4), (0x30<<4)); //??? /* Flow control DSC tolerance, default: 24 pages ( also minimum value ) */
+		rtl865x_reg_rmw(rsw, RTL865X_SW_REG_MAC_CONFIG,
+			(RTL865X_SW_CF_SYSCLK_SEL_MASK<<RTL865X_SW_CF_SYSCLK_SEL_SHIFT),
+			(RTL865X_SW_CF_SYSCLK_SEL_GIGA_LINK<<RTL865X_SW_CF_SYSCLK_SEL_SHIFT));
+		rtl865x_reg_rmw(rsw, RTL865X_SW_REG_MAC_CONFIG,
+			(RTL865X_SW_CF_RXIPG_MASK<<RTL865X_SW_CF_RXIPG_SHIFT),
+			(0x5<<RTL865X_SW_CF_RXIPG_SHIFT)); /* 100M half duplex enhancement */ //???
+		rtl865x_reg_rmw(rsw, RTL865X_SW_REG_MAC_CONFIG,
+			(RTL865X_SW_CF_FCDSC_MASK<<RTL865X_SW_CF_FCDSC_SHIFT),
+			(0x30<<RTL865X_SW_CF_FCDSC_SHIFT)); //??? /* Flow control DSC tolerance, default: 24 pages ( also minimum value ) */
 
-		rtl865x_reg_rmw(rsw, RTL865X_SW_PORT_CONFIG_BASE + port_reg, (1<<4)|(3<<0), (1<<4)|(5<<0));   //GMII Configuration Register // P0txdly = 1; P0rxdly = 5
-		//rtl865x_reg_rmw(rsw, RTL865X_SW_PORT_CONFIG_BASE + port_reg, 0, (3<<25)); // Enable CPU tag / Enable Tx CPU tag
+		rtl865x_reg_rmw(rsw, port_reg, (1<<4)|(3<<0), (1<<4)|(5<<0));   //GMII Configuration Register // P0txdly = 1; P0rxdly = 5
+		//rtl865x_reg_rmw(rsw, port_reg, 0, RTL865X_SW_GMII_CPU_TAG|RTL865X_SW_GMII_TX_CPU_TAG);
+		//rtl865x_reg_rmw(rsw, RTL865X_SW_REG_MAC_CONFIG_1, 0, PORT0_ROUTER_MODE);
 
-		rtl865x_reg_rmw(rsw, RTL865X_SW_PORT_CONFIG_BASE + port_reg, 0, (1<<6));   //GMII Configuration Register // Conf_done
+		switch (id) {
+		case 0:
+			rtl865x_reg_rmw(rsw, RTL865X_SW_REG_PORT_INTERFACE_TYPE, 0, RTL865X_SW_PIT_P0_GMII_MII_RGMII);
+			break;
+		case 5:
+			rtl865x_reg_write(rsw, RTL865X_SW_REG_PORT_INTERFACE_TYPE, 0xFFFFF3FF);
+			break;
+		}
+
+		rtl865x_reg_rmw(rsw, port_reg, 0, RTL865X_SW_GMII_CONF_DONE);
 
 		dev_info(rsw->parent, "using fixed link parameters for port %d", id);
 
