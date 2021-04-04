@@ -1,0 +1,32 @@
+diff --git a/drivers/net/phy/rtl8367b.c b/drivers/net/phy/rtl8367b.c
+index 3599791a5..545448bbf 100644
+--- a/drivers/net/phy/rtl8367b.c
++++ b/drivers/net/phy/rtl8367b.c
+@@ -213,6 +213,8 @@
+ #define RTL8367B_RTL_MAGIC_ID_REG		0x13c2
+ #define   RTL8367B_RTL_MAGIC_ID_VAL		0x0249
+ 
++#define RTL8367B_LED_CONFIG_REG			0x1b03
++
+ #define RTL8367B_IA_CTRL_REG			0x1f00
+ #define   RTL8367B_IA_CTRL_RW(_x)		((_x) << 1)
+ #define   RTL8367B_IA_CTRL_RW_READ		RTL8367B_IA_CTRL_RW(0)
+@@ -970,6 +972,7 @@ static int rtl8367b_setup(struct rtl8366_smi *smi)
+ 	struct rtl8367_platform_data *pdata;
+ 	int err;
+ 	int i;
++	u32 led_config;
+ 
+ 	pdata = smi->parent->platform_data;
+ 
+@@ -1021,6 +1024,10 @@ static int rtl8367b_setup(struct rtl8366_smi *smi)
+ 			RTL8367B_PORT_MISC_CFG_EGRESS_MODE_ORIGINAL <<
+ 				RTL8367B_PORT_MISC_CFG_EGRESS_MODE_SHIFT);
+ 
++	/* setup LEDs */
++	if (of_property_read_u32(smi->parent->of_node, "led_config", &led_config) == 0)
++		REG_WR(smi, RTL8367B_LED_CONFIG_REG, led_config);
++
+ 	return 0;
+ }
+ 
