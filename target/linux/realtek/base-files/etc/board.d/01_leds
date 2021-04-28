@@ -7,6 +7,9 @@ board_config_update
 board=$(cat /tmp/sysinfo/board_name)
 
 case $board in
+  w36ap-v1)
+    ucidef_set_led_default "sys" "sys" "w36ap:green:sys" "1"
+    ;;
   a3002ru)
     ucidef_set_led_default "sys" "sys" "a3002ru:orange:cpu" "1"
     ;;
