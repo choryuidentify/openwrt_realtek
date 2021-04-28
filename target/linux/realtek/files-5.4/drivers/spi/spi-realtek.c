@@ -269,6 +269,8 @@ static int realtek_spi_probe(struct platform_device *pdev)
 	master->min_speed_hz = 190000000/16; //realtek_spi_calc_speed(rsd, RTK_SPI_CLK_DIV_MAX_INDEX);
 	master->max_speed_hz = 190000000/2;  //realtek_spi_calc_speed(rsd, 0);
 
+	dev_set_drvdata(&pdev->dev, master);
+
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	rsd->base = devm_ioremap_resource(&pdev->dev, res);
 	if (IS_ERR(rsd->base)) {
