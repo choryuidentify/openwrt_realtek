@@ -57,7 +57,7 @@ static void realtek_gpio_irq_mask(struct irq_data *data)
 	unsigned int irq = data->irq;
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(data);
 	struct realtek_gpio_ctrl *ctrl = container_of(gc, struct realtek_gpio_ctrl, gc);
-	unsigned int pin = irq_linear_revmap(gc->irq.domain, irq);
+	unsigned int pin = irq_linear_revmap(gc->irqdomain, irq);
 	unsigned int pinmask = 0;
 	unsigned int pinreg = 0;
 	u32 mask;
@@ -68,7 +68,7 @@ static void realtek_gpio_irq_mask(struct irq_data *data)
 	}
 	else {
 		pinreg = 0x18; // Interrupt Mask (16-31)
-		pinmask = pin-16;
+		pinmask = pin-16; 
 	}
 
 	mask = realtek_gpio_read(ctrl, pinreg);
@@ -83,7 +83,7 @@ static void realtek_gpio_irq_unmask(struct irq_data *data)
 	unsigned int irq = data->irq;
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(data);
 	struct realtek_gpio_ctrl *ctrl = container_of(gc, struct realtek_gpio_ctrl, gc);
-	unsigned int pin = irq_linear_revmap(gc->irq.domain, irq);
+	unsigned int pin = irq_linear_revmap(gc->irqdomain, irq);
 	unsigned int pinmask = 0;
 	unsigned int pinreg = 0;
 	u32 mask;
@@ -94,7 +94,7 @@ static void realtek_gpio_irq_unmask(struct irq_data *data)
 	}
 	else {
 		pinreg = 0x18; // Interrupt Mask (16-31)
-		pinmask = pin-16;
+		pinmask = pin-16; 
 	}
 
 	mask = realtek_gpio_read(ctrl, pinreg);
@@ -110,7 +110,7 @@ static int realtek_gpio_irq_set_type(struct irq_data *data, unsigned int type)
 	unsigned int irq = data->irq;
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(data);
 	struct realtek_gpio_ctrl *ctrl = container_of(gc, struct realtek_gpio_ctrl, gc);
-	unsigned int pin = irq_linear_revmap(gc->irq.domain, irq);
+	unsigned int pin = irq_linear_revmap(gc->irqdomain, irq);
 	unsigned int pinmask = 0;
 	unsigned int pinreg = 0;
 	unsigned int newvalue = 0;
@@ -122,7 +122,7 @@ static int realtek_gpio_irq_set_type(struct irq_data *data, unsigned int type)
 	}
 	else {
 		pinreg = 0x18; // Interrupt Mask (16-31)
-		pinmask = pin-16;
+		pinmask = pin-16; 
 	}
 
 	mask = realtek_gpio_read(ctrl, pinreg);
@@ -177,17 +177,17 @@ static void realtek_gpio_irq_handler(struct irq_desc *desc)
 	mask2  = realtek_gpio_read(ctrl, 0x18); // Interrupt Mask (16-31)
 
 	/* get the mask for interrupt status register by ourself */
-	for(i = 0; i < 16; i++)
+	for(i = 0; i < 16; i++) 
 		mask3 |= ((0x3 << (i*2)) & mask1 ? 1 : 0) << i;
-	for(i = 16; i < 32; i++)
+	for(i = 16; i < 32; i++) 
 		mask3 |= ((0x3 << ((i-16)*2)) & mask2 ? 1 : 0) << i;
-
+	
 	/* mask the pins which don't have interrupt */
 	pending = status & mask3;
 
 	if (pending) {
 		for_each_set_bit(irq, &pending, 32)
-			generic_handle_irq(irq_linear_revmap(gc->irq.domain, irq));
+			generic_handle_irq(irq_linear_revmap(gc->irqdomain, irq));
 	}
 
 	chained_irq_exit(irqchip, desc);

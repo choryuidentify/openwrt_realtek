@@ -33,7 +33,7 @@
 		memc: memory-controller@1000 {
 			compatible = "realtek,rtl819x-memc";
 			reg = <0x1000 0x100>;
-		};
+		};		
 
 		uartlite: serial@2000 {
 			compatible = "realtek,rtl819x-uart", "ns16550a";

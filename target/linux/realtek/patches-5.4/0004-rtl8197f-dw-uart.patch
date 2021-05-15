@@ -1,25 +1,23 @@
-diff --git a/drivers/tty/serial/8250/8250_dw.c b/drivers/tty/serial/8250/8250_dw.c
-index 51a7d3b19..aaf9f6073 100644
---- a/drivers/tty/serial/8250/8250_dw.c
-+++ b/drivers/tty/serial/8250/8250_dw.c
-@@ -39,6 +39,8 @@ struct dw8250_data {
- 	struct dw8250_port_data	data;
+--- linux-4.14.131.orig/drivers/tty/serial/8250/8250_dw.c
++++ linux-4.14.131/drivers/tty/serial/8250/8250_dw.c
+@@ -58,6 +58,8 @@
  
+ struct dw8250_data {
  	u8			usr_reg;
 +	u8			tx_reg;
 +	u8			rx_reg;
+ 	int			line;
  	int			msr_mask_on;
  	int			msr_mask_off;
- 	struct clk		*clk;
-@@ -47,6 +49,7 @@ struct dw8250_data {
+@@ -68,6 +70,7 @@
  
  	unsigned int		skip_autocfg:1;
  	unsigned int		uart_16550_compatible:1;
 +	unsigned int		adjlcr:1;
  };
  
- static inline struct dw8250_data *to_dw8250_data(struct dw8250_port_data *data)
-@@ -79,6 +82,13 @@ static void dw8250_check_lcr(struct uart_port *p, int value)
+ static inline int dw8250_modify_msr(struct uart_port *p, int offset, int value)
+@@ -95,6 +98,13 @@
  {
  	void __iomem *offset = p->membase + (UART_LCR << p->regshift);
  	int tries = 1000;
@@ -33,8 +31,8 @@ index 51a7d3b19..aaf9f6073 100644
  
  	/* Make sure LCR write wasn't ignored */
  	while (tries--) {
-@@ -142,11 +152,21 @@ static void dw8250_serial_out38x(struct uart_port *p, int offset, int value)
- 		dw8250_check_lcr(p, value);
+@@ -123,10 +133,21 @@
+ 	 */
  }
  
 +static int dw_change_offset(struct uart_port *p, int offset)
@@ -43,19 +41,19 @@ index 51a7d3b19..aaf9f6073 100644
 +	if(offset == UART_TX)
 +		return d->tx_reg;
 +	if(offset == UART_RX)
-+		return d->rx_reg;
++		return d->rx_reg;	
 +	return offset;
 +}
- 
++
  static void dw8250_serial_out(struct uart_port *p, int offset, int value)
  {
- 	struct dw8250_data *d = to_dw8250_data(p->private_data);
+ 	struct dw8250_data *d = p->private_data;
  
 +	offset = dw_change_offset(p, offset);
  	writeb(value, p->membase + (offset << p->regshift));
  
  	if (offset == UART_LCR && !d->uart_16550_compatible)
-@@ -155,6 +175,7 @@ static void dw8250_serial_out(struct uart_port *p, int offset, int value)
+@@ -135,6 +156,7 @@
  
  static unsigned int dw8250_serial_in(struct uart_port *p, int offset)
  {
@@ -63,15 +61,15 @@ index 51a7d3b19..aaf9f6073 100644
  	unsigned int value = readb(p->membase + (offset << p->regshift));
  
  	return dw8250_modify_msr(p, offset, value);
-@@ -188,6 +209,7 @@ static void dw8250_serial_out32(struct uart_port *p, int offset, int value)
+@@ -168,6 +190,7 @@
  {
- 	struct dw8250_data *d = to_dw8250_data(p->private_data);
+ 	struct dw8250_data *d = p->private_data;
  
 +	offset = dw_change_offset(p, offset);
  	writel(value, p->membase + (offset << p->regshift));
  
  	if (offset == UART_LCR && !d->uart_16550_compatible)
-@@ -196,6 +218,7 @@ static void dw8250_serial_out32(struct uart_port *p, int offset, int value)
+@@ -176,6 +199,7 @@
  
  static unsigned int dw8250_serial_in32(struct uart_port *p, int offset)
  {
@@ -79,15 +77,15 @@ index 51a7d3b19..aaf9f6073 100644
  	unsigned int value = readl(p->membase + (offset << p->regshift));
  
  	return dw8250_modify_msr(p, offset, value);
-@@ -205,6 +228,7 @@ static void dw8250_serial_out32be(struct uart_port *p, int offset, int value)
+@@ -185,6 +209,7 @@
  {
- 	struct dw8250_data *d = to_dw8250_data(p->private_data);
+ 	struct dw8250_data *d = p->private_data;
  
 +	offset = dw_change_offset(p, offset);
  	iowrite32be(value, p->membase + (offset << p->regshift));
  
  	if (offset == UART_LCR && !d->uart_16550_compatible)
-@@ -213,6 +237,7 @@ static void dw8250_serial_out32be(struct uart_port *p, int offset, int value)
+@@ -193,6 +218,7 @@
  
  static unsigned int dw8250_serial_in32be(struct uart_port *p, int offset)
  {
@@ -95,7 +93,7 @@ index 51a7d3b19..aaf9f6073 100644
         unsigned int value = ioread32be(p->membase + (offset << p->regshift));
  
         return dw8250_modify_msr(p, offset, value);
-@@ -358,6 +383,15 @@ static void dw8250_quirks(struct uart_port *p, struct dw8250_data *data)
+@@ -338,6 +364,15 @@
  			data->skip_autocfg = true;
  		}
  #endif
@@ -111,20 +109,20 @@ index 51a7d3b19..aaf9f6073 100644
  		if (of_device_is_big_endian(p->dev->of_node)) {
  			p->iotype = UPIO_MEM32BE;
  			p->serial_in = dw8250_serial_in32be;
-@@ -426,6 +460,9 @@ static int dw8250_probe(struct platform_device *pdev)
+@@ -452,6 +487,9 @@
  
- 	data->data.dma.fn = dw8250_fallback_dma_filter;
+ 	data->dma.fn = dw8250_fallback_dma_filter;
  	data->usr_reg = DW_UART_USR;
 +	data->tx_reg = UART_TX;
 +	data->rx_reg = UART_RX;
 +	data->adjlcr=false;
- 	p->private_data = &data->data;
+ 	p->private_data = data;
  
  	data->uart_16550_compatible = device_property_read_bool(dev,
-@@ -635,6 +672,7 @@ static const struct of_device_id dw8250_of_match[] = {
+@@ -658,6 +696,7 @@
+ static const struct of_device_id dw8250_of_match[] = {
+ 	{ .compatible = "snps,dw-apb-uart" },
  	{ .compatible = "cavium,octeon-3860-uart" },
- 	{ .compatible = "marvell,armada-38x-uart" },
- 	{ .compatible = "renesas,rzn1-uart" },
 +	{ .compatible = "realtek,rtl8197f-uart" },
  	{ /* Sentinel */ }
  };

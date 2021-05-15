@@ -1,8 +1,6 @@
-diff --git a/arch/mips/pci/Makefile b/arch/mips/pci/Makefile
-index d6de4cb2e..039949bc7 100644
 --- a/arch/mips/pci/Makefile
 +++ b/arch/mips/pci/Makefile
-@@ -51,6 +51,7 @@ obj-$(CONFIG_PCI_LANTIQ)	+= pci-lantiq.o ops-lantiq.o
+@@ -49,6 +49,7 @@
  obj-$(CONFIG_SOC_MT7620)	+= pci-mt7620.o
  obj-$(CONFIG_SOC_RT288X)	+= pci-rt2880.o
  obj-$(CONFIG_SOC_RT3883)	+= pci-rt3883.o

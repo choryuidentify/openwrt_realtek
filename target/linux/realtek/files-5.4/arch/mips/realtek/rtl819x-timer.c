@@ -91,11 +91,12 @@ void rtl819x_clocksource_init(unsigned long freq)
 #endif
 }
 
+
 static int rtl819x_set_state_shutdown(struct clock_event_device *cd)
 {
 	u32 val;
 
-	// Disable Timer
+	// Disable Timer 
 	val = tc_r32(REALTEK_TC_REG_CTRL);
 	val &= ~(REALTEK_TC_CTRL_TC0_EN);
 	tc_w32(val, REALTEK_TC_REG_CTRL);
@@ -194,7 +195,7 @@ static int __init rtl819x_timer_init(struct device_node *np)
 	if(!clk)
 		panic("Cant find reference clock for timer!\n");
 
-	timer_rate = clk_get_rate(clk);
+ 	timer_rate = clk_get_rate(clk);
 
 	// Realtek use a default bus rate of 200MHz
 	div_fac = 200000000/timer_rate;

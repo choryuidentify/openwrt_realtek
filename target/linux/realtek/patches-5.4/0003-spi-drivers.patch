@@ -1,8 +1,6 @@
-diff --git a/drivers/spi/Kconfig b/drivers/spi/Kconfig
-index 6f7fdcbb9..421c037b0 100644
---- a/drivers/spi/Kconfig
-+++ b/drivers/spi/Kconfig
-@@ -551,6 +551,11 @@ config SPI_PXA2XX
+--- a/drivers/spi/Kconfig	
++++ b/drivers/spi/Kconfig	
+@@ -527,6 +527,11 @@
  config SPI_PXA2XX_PCI
  	def_tristate SPI_PXA2XX && PCI && COMMON_CLK
  
@@ -10,28 +8,26 @@ index 6f7fdcbb9..421c037b0 100644
 +	tristate "Realtek RTL819x SPI controller driver"
 +	help
 +	  This selects a driver for Realtek RTL8196E and RTL8197D SoC
-+
++ 
  config SPI_ROCKCHIP
  	tristate "Rockchip SPI controller driver"
  	help
-@@ -667,6 +672,11 @@ config SPI_SIFIVE
+@@ -619,6 +624,11 @@
  	help
- 	  This exposes the SPI controller IP from SiFive.
+ 	  SPI driver for SuperH HSPI blocks.
  
 +config SPI_SHEIPA
 +	tristate "Sheipa SPI controller"
 +	help
-+	  SPI driver for Sheipa Controller
++	  SPI driver for Sheipa Controller 
 +
  config SPI_SIRF
  	tristate "CSR SiRFprimaII SPI controller"
  	depends on SIRF_DMA
-diff --git a/drivers/spi/Makefile b/drivers/spi/Makefile
-index bb49c9e6d..d387ec770 100644
 --- a/drivers/spi/Makefile
-+++ b/drivers/spi/Makefile
-@@ -123,6 +123,9 @@ obj-$(CONFIG_SPI_XTENSA_XTFPGA)		+= spi-xtensa-xtfpga.o
- obj-$(CONFIG_SPI_ZYNQ_QSPI)		+= spi-zynq-qspi.o
++++ b/drivers/spi/Makefile	
+@@ -109,6 +109,9 @@
+ obj-$(CONFIG_SPI_XTENSA_XTFPGA)		+= spi-xtensa-xtfpga.o
  obj-$(CONFIG_SPI_ZYNQMP_GQSPI)		+= spi-zynqmp-gqspi.o
  
 +obj-$(CONFIG_SPI_REALTEK)			+= spi-realtek.o

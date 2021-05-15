@@ -338,7 +338,7 @@ static void flash_set_status(struct sheipa_spi *dev, uint32_t addr, uint8_t cmd)
 	/* Set flash_cmd: WREN to FIFO */
 	if (!enable_addr_4byte_mode)
 		data = (uint32_t) (addr >> 16);
-	else
+	else			
 		/* for 4-byte address mode */
 		data = (uint32_t) (addr >> 24);
 	/* Disable SPI_FLASH */
@@ -1284,7 +1284,7 @@ static int dw_spi_transfer(struct spi_master *master, struct spi_message *msg)
 		}
 
 		if (t->tx_buf) {
-			// first xfer is the cmd
+			// first xfer is the cmd 
 			if (msg->actual_length == 0)
 				do_spi_cmd(dws, t->tx_buf, t->len);
 			else
