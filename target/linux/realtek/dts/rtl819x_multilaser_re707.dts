@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 /dts-v1/;
 
-#include "RTL819X.dtsi"
+#include "rtl819x.dtsi"
 
 / {
-	compatible = "multilaser,re172", "realtek,rtl819x-soc";
-	model = "Multilaser RE172 V1";
+	compatible = "multilaser,re707", "realtek,rtl819x-soc";
+	model = "Multilaser RE707";
 
 	cpus {
 		cpu@0 {
@@ -36,17 +36,13 @@
 
 		partition@0 {
 			label = "boot";
-			reg = <0x0 0x10000>;
+			reg = <0x0 0x20000>;
 			read-only;
 		};
 
-		partition@10000 {
+		partition@20000 {
 			label = "firmware";
-			reg = <0x10000 0x3F0000>;
+			reg = <0x20000 0x3E0000>;
 		};
 	};
-};
-
-&pcie0 {
-	status = "okay";
 };

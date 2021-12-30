@@ -115,12 +115,11 @@ define Device/RealtekDTS
 endef
 
 ifeq ($(SUBTARGET),rtl8197d)
-define Device/A3002RU
+define Device/totolink,a3002ru
   $(Device/RealtekDTS)
   BLOCKSIZE := 4k
   DEVICE_DTS := A3002RU
   DEVICE_TITLE := TOTOLINK A3002RU v1
-  SUPPORTED_DEVICES := a3002ru
   IMAGE_SIZE := 7936k
   DEV_PROFILE := A3002RU
   CMDLINE := console=ttyS0,38400
@@ -133,13 +132,12 @@ define Device/A3002RU
 endef
 TARGET_DEVICES += A3002RU
 
-define Device/DIR815D1
+define Device/dlink,dir-815-d1
   $(Device/RealtekDTS)
   DEVICE_DTS := DIR815D1
   DEV_PROFILE := DIR815D1
   IMAGE_SIZE := 7936k
   DEVICE_TITLE := D-Link DIR-815 D1
-  SUPPORTED_DEVICES := dir-815-d1
   IMAGES := factory.bin sysupgrade.bin
   IMAGE/factory.bin := append-kernel | pad-to 1900544 | append-rootfs | pad-rootfs | \
 	tbs_dlink_big -k 0x197400 -r 0x4DFF70 -g BR -m DIR825G1 -p RTL8197DL_AC1200
@@ -148,12 +146,11 @@ define Device/DIR815D1
 endef
 TARGET_DEVICES += DIR815D1
 
-define Device/DIR822C1
+define Device/dlink,dir-822-c1
   $(Device/RealtekDTS)
   BLOCKSIZE := 64k
   DEVICE_DTS := DIR822C1
   DEVICE_TITLE := D-Link DIR-822 C1
-  SUPPORTED_DEVICES := dir-822-c1
   IMAGE_SIZE := 7936k
   DEV_PROFILE := DIR822C1
   CMDLINE := console=ttyS0,38400
@@ -169,12 +166,11 @@ TARGET_DEVICES += DIR822C1
 endif
 
 ifeq ($(SUBTARGET),rtl8197f)
-define Device/RE708
+define Device/multilaser,re708
   $(Device/RealtekDTS)
   BLOCKSIZE := 64k
   DEVICE_DTS := RE708
-  DEVICE_TITLE := Multilaser RE708 V1
-  SUPPORTED_DEVICES := re708v1 re708-v1
+  DEVICE_TITLE := Multilaser RE708
   IMAGE_SIZE := 7936k
   DEV_PROFILE := RE708
   CMDLINE := console=ttyS0,38400
@@ -187,7 +183,7 @@ define Device/RE708
 endef
 TARGET_DEVICES += RE708
 
-define Device/GWR1200AC
+define Device/greatek,gwr1200ac-v1
   $(Device/RealtekDTS)
   BLOCKSIZE := 64k
   DEVICE_TITLE := Greatek GWR1200AC V1

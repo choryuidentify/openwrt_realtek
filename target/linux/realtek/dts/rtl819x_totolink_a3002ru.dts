@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /dts-v1/;
 
-#include "RTL819X.dtsi"
+#include "rtl819x.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
@@ -48,12 +48,12 @@
 		compatible = "gpio-leds";
 
 		cpu {
-			label = "a3002ru:orange:cpu";
+			label = "orange:cpu";
 			gpios = <&gpio0 6 GPIO_ACTIVE_LOW>;
 		};
 
 		usb {
-			label = "a3002ru:orange:usb";
+			label = "orange:usb";
 			gpios = <&gpio0 16 GPIO_ACTIVE_LOW>;
 		};
 	};

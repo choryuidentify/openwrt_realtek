@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0
 /dts-v1/;
 
-#include "RTL819X.dtsi"
+#include "rtl819x.dtsi"
 
 / {
-	compatible = "D-Link,dir-822-c1", "realtek,rtl819x-soc";
+	compatible = "dlink,dir-822-c1", "realtek,rtl819x-soc";
 	model = "D-Link DIR-822 C1";
 
 	cpus {

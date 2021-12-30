@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0
 /dts-v1/;
 
-#include "RTL8197F.dtsi"
+#include "rtl8197fvg.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 
 / {
-	compatible = "intelbras,actionrg1200", "realtek,rtl8197f-soc";
-	model = "Intelbras ACTIONRG1200 V1";
+	compatible = "greatek,gwr1200ac-v2", "realtek,rtl8197f-soc";
+	model = "Greatek GWR1200AC V2";
 
 	aliases {
 		led-boot = &led_status;
@@ -23,7 +23,7 @@
 	};
 
 	chosen {
-		bootargs = "console=ttyS0,115200";
+		bootargs = "console=ttyS0,38400";
 	};
 
 	gpio-keys-polled {
@@ -42,25 +42,17 @@
 	gpio-leds {
 		compatible = "gpio-leds";
 
-		led_status: sys {
-			label = "actionrg1200:blue:sys";
-			gpios = <&gpio1 25 GPIO_ACTIVE_LOW>;
+		led_status: power {
+			label = "gwr1200ac:green:power";
+			gpios = <&gpio0 19 GPIO_ACTIVE_LOW>;
 		};
 
-		wan {
-			label = "actionrg1200:blue:wan";
-			gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;
-		};
+	// Breaks device switch. Still needs fix before using it
+	// 	wps {
+	// 		label = "gwr1200ac:green:wps";
+	// 		gpios = <&gpio1 25 GPIO_ACTIVE_LOW>;
+	// 	};
 
-		lan {
-			label = "actionrg1200:blue:lan";
-			gpios = <&gpio0 31 GPIO_ACTIVE_HIGH>;
-		};
-
-		wifi0 {
-			label = "actionrg1200:blue:wifi0";
-			gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
-		};
 	};
 };
 
@@ -90,13 +82,7 @@
 
 		partition@30000 {
 			label = "firmware";
-			reg = <0x30000 0x7B0000>;
-		};
-
-		partition@7E0000 {
-			label = "config";
-			reg = <0x7E0000 0x20000>;
-			read-only;
+			reg = <0x30000 0x7C0000>;
 		};
 	};
 };

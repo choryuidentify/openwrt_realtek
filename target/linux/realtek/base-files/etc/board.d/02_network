@@ -5,7 +5,7 @@
 . /lib/functions/system.sh
 
 board_config_update
-board=$(cat /tmp/sysinfo/board_name)
+board=$(board_name)
 
 ucidef_set_interfaces_lan_wan "eth0" "eth1"
 
@@ -13,38 +13,38 @@ lan_mac=""
 wan_mac=""
 
 case $board in
-  dir-815-d1)
+  dlink,dir-815-d1)
     offset=$(strings -t x "$(find_mtd_part boot)" | grep llconfig | head -n 1 | awk '{ print "0x"$1 }')
     offset=$((offset+53))
     wan_mac=$(mtd_get_mac_binary boot $offset)
     lan_mac=$(macaddr_add "$wan_mac" 1)
     ;;
-  re708-v1)
+  multilaser,re708)
     wan_mac=$(mtd_get_mac_binary boot 131079)
     lan_mac=$(macaddr_add "$wan_mac" 1)
     ;;
-  gwr1200ac-v1)
+  greatek,gwr1200ac-v1)
     wan_mac=$(mtd_get_mac_binary boot 131091)
     lan_mac=$(macaddr_add "$wan_mac" 1)
     ;;
-  gwr1200ac-v2)
+  greatek,gwr1200ac-v2)
     wan_mac=$(mtd_get_mac_binary boot 131091)
     lan_mac=$(macaddr_add "$wan_mac" 1)
     ;;
-  actionrg1200-v1 | \
-  actionrf1200-v1)
+  interbras,action-rg-1200 | \
+  interbras,action-rf-1200)
     wan_mac=$(mtd_get_mac_ascii boot HW_NIC0_ADDR)
     lan_mac=$(macaddr_add "$wan_mac" 1)
     ;;
-  gwr-300n-v1)
+  greatek,gwr-300n)
     wan_mac=$(mtd_get_mac_binary boot 24595)
     lan_mac=$(mtd_get_mac_binary boot 24583)
     ;;
-  re172-v1)
+  multilaser,re172)
     wan_mac=$(mtd_get_mac_binary boot 24583)
     lan_mac=$(mtd_get_mac_binary boot 24595)
   ;;
-  w36ap-v1)
+  ip-com,w36ap)
     wan_mac=$(mtd_get_mac_ascii cfg HW_NIC1_ADDR)
     lan_mac=$(mtd_get_mac_ascii cfg HW_NIC0_ADDR)
 esac

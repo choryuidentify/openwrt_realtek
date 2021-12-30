@@ -1,21 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0
 /dts-v1/;
 
-#include "RTL8197FVG.dtsi"
+#include "rtl8197f.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 
 / {
-	compatible = "greatek,gwr1200ac", "realtek,rtl8197f-soc";
-	model = "Greatek GWR1200AC V2";
-
-	aliases {
-		led-boot = &led_status;
-		led-failsafe = &led_status;
-		led-running = &led_status;
-		led-upgrade = &led_status;
-	};
+	compatible = "greatek,gwr1200ac-v1", "realtek,rtl8197f-soc";
+	model = "Greatek GWR1200AC V1";
 
 	memory {
 		device_type = "memory";
@@ -39,25 +32,16 @@
 		};
 	};
 
-	gpio-leds {
-		compatible = "gpio-leds";
-
-		led_status: power {
-			label = "gwr1200ac:green:power";
-			gpios = <&gpio0 19 GPIO_ACTIVE_LOW>;
-		};
-
 	// Breaks device switch. Still needs fix before using it
+	// gpio-leds {
+	// 	compatible = "gpio-leds";
+
 	// 	wps {
-	// 		label = "gwr1200ac:green:wps";
+	// 		label = "green:wps";
 	// 		gpios = <&gpio1 25 GPIO_ACTIVE_LOW>;
 	// 	};
+	// };
 
-	};
-};
-
-&gpio0 {
-	status = "okay";
 };
 
 &gpio1 {

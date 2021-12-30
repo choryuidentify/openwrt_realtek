@@ -3,7 +3,6 @@
 #
 
 . /lib/functions/system.sh
-. /lib/realtek.sh
 
 PART_NAME=firmware
 
